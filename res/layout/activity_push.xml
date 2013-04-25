@@ -11,7 +11,8 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="120dp"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/selector_push_button"
+        android:src="@drawable/push_gray"
+        android:clickable="false"
         android:background="@null"/>
     <TextView
         android:id="@+id/textWelcome"

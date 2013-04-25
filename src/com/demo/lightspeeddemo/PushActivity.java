@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,10 +25,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class PushActivity extends Activity {
-	private Handler gMainHandler;
+	
+	static Handler sPushHandler = null;
+	static final int PUSH_ENABLE = 0x01;
+	
 	private ImageButton gButtonPush;
 	private TextView gTextWelcome;
 	private TextView gShowResult;
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -42,7 +48,22 @@ public class PushActivity extends Activity {
 		
 		// Handler binding with main thread. Handler allow you to send task to thread.
 		// Later, we need this handler to post UI task to main thread.
-		gMainHandler = new Handler();
+		sPushHandler = new Handler(){
+
+			@Override
+			public void handleMessage(Message msg) {
+				// TODO Auto-generated method stub
+				switch(msg.what){
+				
+				case PUSH_ENABLE:
+					// Enable the push button.
+					gButtonPush.setClickable(true);
+					gButtonPush.setImageResource(R.drawable.selector_push_button);
+					break;
+				}
+			}
+			
+		};
 		
 		// Push Button click event
 		gButtonPush = (ImageButton) findViewById(R.id.buttonPush);
@@ -54,6 +75,12 @@ public class PushActivity extends Activity {
 			}
 		});
 		
+		// If push service was enabled, enable the push button.
+		Boolean pushEnabled = this.getIntent().getExtras().getBoolean("pushService", false);
+		if( pushEnabled == true ){
+			gButtonPush.setClickable(true);
+			gButtonPush.setImageResource(R.drawable.selector_push_button);
+		}
 	}
 
 	@Override
@@ -63,6 +90,7 @@ public class PushActivity extends Activity {
 		
 		//Allocate current activity to null as life cycle changes to pause.
 		MainActivity.sCurrentAct = null;
+		sPushHandler = null;
 	}
 	
 	public class PushRunn implements Runnable{
@@ -76,7 +104,7 @@ public class PushActivity extends Activity {
 			
 			// The format of notification message should be a json type. 
 			List<NameValuePair> pair = new ArrayList<NameValuePair>(1);
-			pair.add(new BasicNameValuePair("payload","{android: {alert:This is a Lightspeed Push Notification ,sound:default, vibrate:true, title:Lightspeed}}"));
+			pair.add(new BasicNameValuePair("payload","{ \"android\": {\"alert\":\"This is a Lightspeed Push Notification\" ,\"sound\":\"default\", \"vibrate\":true, \"title\":\"Lightspeed\"}}"));
 			
 			try {
 				// Implement a http request on httpPost 
@@ -90,7 +118,7 @@ public class PushActivity extends Activity {
 				Log.i(MainActivity.LOG_TAG,"Response string = "+ str);
 				
 				// Check whether the post is success
-				gMainHandler.post(new CheckPushResult(str));
+				sPushHandler.post(new CheckPushResult(str));
 				
 			} catch (ClientProtocolException e1) {
 				e1.printStackTrace();
@@ -100,6 +128,7 @@ public class PushActivity extends Activity {
 			
 		}
 	}
+	
 	
 	public class CheckPushResult implements Runnable{
 		private String mResult;

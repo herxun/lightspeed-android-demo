@@ -37,6 +37,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.arrownock.push.AnPush;
+import com.arrownock.push.AnPushCallbackAdapter;
 import com.arrownock.push.ArrownockException;
 
 
@@ -49,6 +50,7 @@ public class MainActivity extends Activity {
 	static String loginUrl = "http://api.lightspeedmbs.com/v1/admins/login.json";
 	// sCurrentAct will reference to current Activity context as Activity's onResume() is invoked.
 	static Context sCurrentAct = null;
+	
 	
 	static HttpClient httpClient;
 	static Typeface gFont;
@@ -64,6 +66,10 @@ public class MainActivity extends Activity {
 	private final String LIGHT_SPEED_PREF = "Lightspeed";
 	private final String SAVED_LOGIN_NAME = "saved_login_name";
 	private final String SAVED_LOGIN_PASS = "saved_login_pass";
+	private final int PushActResult = 0x01;
+	
+	private AnPush gAnPush;
+	private boolean gPushServiceEnalbed = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +103,7 @@ public class MainActivity extends Activity {
 		// Later, we need this handler to post UI task to main thread.
 		gMainhandler = new Handler();
 		
+		
 		// The channel names we'll register at Lightspeed.
 		List channels = new ArrayList();
 		channels.add("channel1");
@@ -106,11 +113,44 @@ public class MainActivity extends Activity {
 
 		try {
 		   
-			//Register your device with Lightspeed at designated channels.
-			AnPush.getInstance(getBaseContext()).register(channels);
-		  
-			// Enable Lightspeed notification service
-			AnPush.getInstance(this).enable();
+			//Instantiate Lightspeed AnPush instance which is an entry point of Lightspeed service.
+			gAnPush = AnPush.getInstance(getBaseContext());
+			Log.i("TEST","current id = "+Thread.currentThread().getId());
+			// Designate AnPush callback function. The override method register() would be invoked after register success. 
+			// Scenario: We need to make sure the push service is enabled after successful registration. 
+			gAnPush.setCallback(new AnPushCallbackAdapter(){
+				
+				@Override
+				public void register(boolean err, String anid,
+						ArrownockException exception) {
+					// TODO Auto-generated method stub
+					super.register(err, anid, exception);
+					
+					try {
+						// Put enable() method inside the register callback.
+						gAnPush.enable();
+						
+						if( PushActivity.sPushHandler == null ){
+							// sPushHandler null means PushActivity is not running yet.
+							// This boolean value would be carried with intent as starting PushActivity.
+							gPushServiceEnalbed = true;
+						}
+						else{
+							// PushActivity is running. 
+							// Send message to Handler of PushActivity to enable push button.
+							PushActivity.sPushHandler.obtainMessage(PushActivity.PUSH_ENABLE).sendToTarget();
+						}
+						
+					} catch (ArrownockException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			});
+			
+			// Register channels to Lightspeed service.
+			// If register is success, the callback function register() in AnPushCallbackAdapter would be invoked.
+			gAnPush.register(channels);
 			
 		} catch (ArrownockException ex) {
 			// If there's any error occur during register procedure, we'll print error message on Logcat.
@@ -139,9 +179,8 @@ public class MainActivity extends Activity {
 		});
 
 	}
-	
-	
 
+	
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
@@ -259,8 +298,9 @@ public class MainActivity extends Activity {
 					// Start PushActivity by intent.
 					// Intent could be think as the glue between activities. It could be used to launch activity. 
 					Intent intent = new Intent();
+					intent.putExtra("pushService", gPushServiceEnalbed);
 					intent.setClass(getApplicationContext(), PushActivity.class);
-					startActivity(intent);
+					startActivityForResult(intent, PushActResult);
 				}
 				else{
 					try {
@@ -307,6 +347,9 @@ public class MainActivity extends Activity {
 	     // Return full string
 	     return total.toString();
 	}
+
+	
+	
 
 
 }
