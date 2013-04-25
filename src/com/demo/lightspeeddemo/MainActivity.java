@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
 	// This is the login URL of Lightspeed.
 	static String loginUrl = "http://api.lightspeedmbs.com/v1/admins/login.json";
 	// sCurrentAct will reference to current Activity context as Activity's onResume() is invoked.
-	static Context sCurrentAct;
+	static Context sCurrentAct = null;
 	
 	static HttpClient httpClient;
 	static Typeface gFont;
@@ -141,6 +141,17 @@ public class MainActivity extends Activity {
 	}
 	
 	
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		
+		//Allocate current activity to null as life cycle changes to pause..
+		sCurrentAct = null;
+	}
+
+
 
 	@Override
 	protected void onResume() {

@@ -56,6 +56,15 @@ public class PushActivity extends Activity {
 		
 	}
 
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		
+		//Allocate current activity to null as life cycle changes to pause.
+		MainActivity.sCurrentAct = null;
+	}
+	
 	public class PushRunn implements Runnable{
 
 		@Override

@@ -1,9 +1,13 @@
 package com.demo.lightspeeddemo;
 
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -26,8 +30,11 @@ public class ExtendedReceiver extends PushBroadcastReceiver {
 		
 		// Default behavior of Lightspeed PushBroadcastReceiver
 		super.onReceive(context, intent);
-		//Log.i("TEST","Origin context = "+ context.getPackageName() + ", string= "+ context.toString());
 		
+		// If current activity is null, we won't invoke dialog.
+		if( MainActivity.sCurrentAct == null ){
+			return;
+		}		
 		
 		String alert = null;
 		String title = null;
@@ -36,9 +43,6 @@ public class ExtendedReceiver extends PushBroadcastReceiver {
 		// Get the bundle and retrieve the string by key "payload" in the bundle.
 		Bundle bundle = intent.getExtras();
 		String payload = bundle.getString("payload");
-		
-		currentContext = context.getApplicationContext();
-		Log.i("TEST","Origin context = "+ currentContext.getPackageName() + ", string= "+ currentContext.toString());
 		
 		try{
 			
@@ -55,9 +59,12 @@ public class ExtendedReceiver extends PushBroadcastReceiver {
 		}
 		
 		// Show a dialog with title and alert inside.
+		
 		ShowDialog(title, alert);
 
 	}
+	
+	
 	
 	public void ShowDialog(String title , String alert){
 		
@@ -92,6 +99,8 @@ public class ExtendedReceiver extends PushBroadcastReceiver {
 		// Show the created dialog on screen.
 		dialog.show();
 	}
+	
+
 
 
 
