@@ -100,9 +100,4 @@ public class ExtendedReceiver extends PushBroadcastReceiver {
 		// Show the created dialog on screen.
 		dialog.show();
 	}
-	
-
-
-
-
 }

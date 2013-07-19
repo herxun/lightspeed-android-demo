@@ -32,7 +32,6 @@
 		
         <activity
             android:name="com.demo.lightspeeddemo.MainActivity"
-            android:label="@string/app_name"
             android:screenOrientation="portrait" 
             android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
@@ -44,7 +43,6 @@
 		 
 		 <activity
 		     android:name="com.demo.lightspeeddemo.PushActivity"
-		     android:label="@string/push_act_name"
 		     android:screenOrientation="portrait" 
 		     android:theme="@android:style/Theme.NoTitleBar"
 		     ></activity>
