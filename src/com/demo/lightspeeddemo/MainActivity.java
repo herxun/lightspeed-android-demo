@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
 		gMainhandler = new Handler();
 
 		// The channel names we'll register at Lightspeed.
-		List channels = new ArrayList();
+		List<String> channels = new ArrayList<String>();
 		channels.add("channel1");
 		channels.add("channel2");
 		channels.add("channel3");
