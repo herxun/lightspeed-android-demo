@@ -13,8 +13,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -28,15 +28,17 @@ public class PushActivity extends Activity {
 	
 	static Handler sPushHandler = null;
 	static final int PUSH_ENABLE = 0x01;
+	static final int PUSH_DISABLE = 0x02;
+	
 	
 	private ImageButton gButtonPush;
 	private TextView gTextWelcome;
 	private TextView gShowResult;
 	
 	
+	@SuppressLint("HandlerLeak")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.activity_push);
 		
@@ -52,13 +54,17 @@ public class PushActivity extends Activity {
 
 			@Override
 			public void handleMessage(Message msg) {
-				// TODO Auto-generated method stub
 				switch(msg.what){
 				
 				case PUSH_ENABLE:
 					// Enable the push button.
 					gButtonPush.setClickable(true);
 					gButtonPush.setImageResource(R.drawable.selector_push_button);
+					break;
+				case PUSH_DISABLE:
+					// Enable the push button.
+					gButtonPush.setClickable(false);
+					gButtonPush.setImageResource(R.drawable.push_gray);
 					break;
 				}
 			}
@@ -85,7 +91,6 @@ public class PushActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 		
 		//Allocate current activity to null as life cycle changes to pause.
@@ -97,7 +102,6 @@ public class PushActivity extends Activity {
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			
 			// Initiate httpPost with loginUrl
 			HttpPost httpPost = new HttpPost("http://api.lightspeedmbs.com/v1/push_notification/send.json?key="+MainActivity.appKey);
@@ -160,7 +164,6 @@ public class PushActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 		//Allocate current activity context to sCurrentAct
 		MainActivity.sCurrentAct = this;

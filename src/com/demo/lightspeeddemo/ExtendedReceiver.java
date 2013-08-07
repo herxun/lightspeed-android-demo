@@ -1,18 +1,14 @@
 package com.demo.lightspeeddemo;
 
-import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.TextView;
 
@@ -21,12 +17,10 @@ import com.arrownock.push.PushBroadcastReceiver;
 // This is the receiver extends Lightspeed default receiver PushBroadcastReceiver
 // We can override "onReceive" method to implement our customized behavior.  
 public class ExtendedReceiver extends PushBroadcastReceiver {
-	private Context currentContext;
 	
 	@Override
 	// As receiving notification, we'll show a dialog with title and alert message 
 	public void onReceive(Context context, Intent intent) {
-		// TODO Auto-generated method stub
 		
 		// Default behavior of Lightspeed PushBroadcastReceiver
 		super.onReceive(context, intent);
@@ -42,6 +36,10 @@ public class ExtendedReceiver extends PushBroadcastReceiver {
 		// Lightspeed notification content would be carried with intent as a bundle.
 		// Get the bundle and retrieve the string by key "payload" in the bundle.
 		Bundle bundle = intent.getExtras();
+		
+		if( bundle == null)
+			return;
+		
 		String payload = bundle.getString("payload");
 		
 		try{

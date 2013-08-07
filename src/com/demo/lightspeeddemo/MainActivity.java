@@ -27,14 +27,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -112,53 +110,57 @@ public class MainActivity extends Activity {
 
 			// Instantiate Lightspeed AnPush instance which is an entry point of Lightspeed service.
 			gAnPush = AnPush.getInstance(getBaseContext());
+			
 			// Designate AnPush callback function. The override method register() would be invoked after register success.
 			// Scenario: We need to make sure the push service is enabled after successful registration.
 			gAnPush.setCallback(new AnPushCallbackAdapter() {
 
 				@Override
 				public void register(boolean err, String anid, ArrownockException exception) {
-					// TODO Auto-generated method stub
 					super.register(err, anid, exception);
 					if (err == true) {
 						Log.e(LOG_TAG, "Register with error = " + exception.getMessage());
 					}
 					try {
-						// Put enable() method inside the register callback.
-						gAnPush.enable();
-						if (PushActivity.sPushHandler == null) {
-							// sPushHandler null means PushActivity is not running yet.
-							// This boolean value would be carried with intent as starting PushActivity.
-							gPushServiceEnalbed = true;
-						} else {
-							// PushActivity is running.
-							// Send message to Handler of PushActivity to enable push button.
-							PushActivity.sPushHandler.obtainMessage(PushActivity.PUSH_ENABLE).sendToTarget();
+						if( gAnPush.isEnabled() ){
+							// If AnPush is already enabled, switch the push button to clickable.
+							switchPushBtn(true);
 						}
-
+						else{
+							// Put enable() method inside the register callback. After this, our device would be able to successfully 
+							// receive push from lightspeed for the channels we registered before.
+							Log.i(LOG_TAG,"Enable Lightspeed Push Service");
+							gAnPush.enable();
+							
+						}
+						
 					} catch (ArrownockException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
 
 				@Override
 				public void statusChanged(AnPushStatus currentStatus, ArrownockException exception) {
+					
 					if (currentStatus == AnPushStatus.ENABLE) {
 						Log.i(LOG_TAG,"Push status enalbed");
+						switchPushBtn(true);
 						
 					} else if (currentStatus == AnPushStatus.DISABLE) {
 						Log.e(LOG_TAG,"Push status disabled");
-						
+						switchPushBtn(false);
 					}
+					
 					if (exception != null) {
-						Log.e(LOG_TAG,"Pust status change with error = "+ exception.toString() );
+						Log.e(LOG_TAG,"Pust status changed with error occuring = "+ exception.toString() );
+						switchPushBtn(false);
 					}
 				}
 			});
 
 			// Register channels to Lightspeed service.
 			// If register is success, the callback function register() in AnPushCallbackAdapter would be invoked.
+			Log.i(LOG_TAG,"Register push channels");
 			gAnPush.register(channels);
 
 		} catch (ArrownockException ex) {
@@ -167,14 +169,13 @@ public class MainActivity extends Activity {
 		}
 
 		// Set click event for login button.
-		// Scenario: We'll post user's email & password to Ligtspeed loginUr and retrieve the response see if the login is success.
+		// Scenario: We'll post user's email & password to Ligtspeed LoginUrl and retrieve the response see if the login is success.
 		gButtonLogin = (ImageButton) findViewById(R.id.buttonLogin);
 		gButtonLogin.setOnClickListener(new OnClickListener() {
 
 			@Override
 			// As click event invoked, system would automatically execute onClick method.
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
 
 				// This is a custom runnable calss handling login procedure.
 				// Send email, password and loginUrl as arguments to create this class.
@@ -186,12 +187,36 @@ public class MainActivity extends Activity {
 			}
 
 		});
-
+	}
+	
+	public void switchPushBtn(Boolean bool){
+		if( bool == true ){
+			
+			if (PushActivity.sPushHandler == null) {
+				// sPushHandler null means PushActivity is not running yet.
+				// This boolean value would be carried with intent as starting PushActivity.
+				gPushServiceEnalbed = true;
+			} else {
+				
+				// PushActivity is running.
+				// Send message to Handler of PushActivity to enable push button.
+				PushActivity.sPushHandler.obtainMessage(PushActivity.PUSH_ENABLE).sendToTarget();
+			}
+		}
+		else{
+			
+			if (PushActivity.sPushHandler == null) {
+				gPushServiceEnalbed = false;
+			} else {
+				PushActivity.sPushHandler.obtainMessage(PushActivity.PUSH_DISABLE).sendToTarget();
+			}
+		}
+		
+		
 	}
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 
 		// Allocate current activity to null as life cycle changes to pause..
@@ -200,7 +225,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 
 		// Allocate current activity context to sCurrentAct
@@ -208,13 +232,6 @@ public class MainActivity extends Activity {
 
 		// Fill blank into result TextView so that it won't display former text such as Login Success.
 		gTextResult.setText("");
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
 	}
 
 	public class loginRunnHttp implements Runnable {
@@ -230,7 +247,6 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 
 			// Instantiate the entity of httpPost with loginUrl
 			HttpPost httpPost = new HttpPost(mUrlAddr);
@@ -284,7 +300,6 @@ public class MainActivity extends Activity {
 				// Get the value of the key "status".
 				status = (String) json.getJSONObject("meta").get("status");
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -310,7 +325,6 @@ public class MainActivity extends Activity {
 					gTextResult.setText(error);
 					gTextResult.setTextColor(0xFF00676F);
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
