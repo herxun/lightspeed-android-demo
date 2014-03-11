@@ -1,10 +1,12 @@
 package com.demo.lightspeeddemo;
 
+import com.crashlytics.android.Crashlytics;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -71,8 +73,11 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Crashlytics.start(this);
 		setContentView(R.layout.activity_main);
 
+		checkBundle();
+		
 		// Retrieve view from XML
 		gEditName = (EditText) findViewById(R.id.editName);
 		gEditPass = (EditText) findViewById(R.id.editPass);
@@ -187,6 +192,16 @@ public class MainActivity extends Activity {
 			}
 
 		});
+	}
+	
+	private void checkBundle(){
+		Bundle b = getIntent().getExtras();
+		if( b != null ){
+			Iterator<String> it = b.keySet().iterator();
+			if( it.hasNext() ){
+				Log.i(LOG_TAG,"key = " + it.next());
+			}
+		}
 	}
 	
 	public void switchPushBtn(Boolean bool){

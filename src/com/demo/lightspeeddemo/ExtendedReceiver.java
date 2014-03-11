@@ -40,6 +40,9 @@ public class ExtendedReceiver extends PushBroadcastReceiver {
 		if( bundle == null)
 			return;
 		
+		if( !bundle.containsKey("payload") )
+			return;
+		
 		String payload = bundle.getString("payload");
 		
 		try{
