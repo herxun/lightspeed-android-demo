@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+	<string name="app_key">NnCm2dtNc76pA2nDE0PezZZFMo5tDMeD</string>
+	
     <string name="app_name">LightSpeedDemo</string>
     <string name="action_settings">Settings</string>
 	<string name="arrival_app_name">LightSpeedArrival</string>

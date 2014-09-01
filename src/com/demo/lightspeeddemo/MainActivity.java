@@ -44,8 +44,6 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	static final String LOG_TAG = "LightSpeedDemo";
 
-	// This is the AppKey you've created on Lightspeed center.
-	static String appKey = "QfpRap3iusW439GqIN81DZllFinuel0U";
 	// This is the login URL of Lightspeed.
 	static String loginUrl = "http://api.lightspeedmbs.com/v1/admins/login.json";
 	// sCurrentAct will reference to current Activity context as Activity's onResume() is invoked.
@@ -75,7 +73,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		Crashlytics.start(this);
 		setContentView(R.layout.activity_main);
-
+		
 		checkBundle();
 		
 		// Retrieve view from XML
@@ -115,7 +113,6 @@ public class MainActivity extends Activity {
 
 			// Instantiate Lightspeed AnPush instance which is an entry point of Lightspeed service.
 			gAnPush = AnPush.getInstance(getBaseContext());
-			
 			// Designate AnPush callback function. The override method register() would be invoked after register success.
 			// Scenario: We need to make sure the push service is enabled after successful registration.
 			gAnPush.setCallback(new AnPushCallbackAdapter() {
