@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -62,7 +63,9 @@ public class MainActivity extends Activity {
 	private final String LIGHT_SPEED_PREF = "Lightspeed";
 	private final String SAVED_LOGIN_NAME = "saved_login_name";
 	private final String SAVED_LOGIN_PASS = "saved_login_pass";
+	private final String REGISTER_TIME_STAMP = "register_time_stamp";
 	private final int PushActResult = 0x01;
+	private final long RegisterDelay = 604800000l;
 
 	private AnPush gAnPush;
 	private boolean gPushServiceEnalbed = false;
@@ -120,22 +123,15 @@ public class MainActivity extends Activity {
 					super.register(err, anid, exception);
 					if (err == true) {
 						Log.e(LOG_TAG, "Register with error = " + exception.getMessage());
-					}
-					try {
-						if( gAnPush.isEnabled() ){
-							// If AnPush is already enabled, switch the push button to clickable.
-							switchPushBtn(true);
-						}
-						else{
-							// Put enable() method inside the register callback. After this, our device would be able to successfully 
-							// receive push from lightspeed for the channels we registered before.
-							Log.i(LOG_TAG,"Enable Lightspeed Push Service");
+					}else{
+						gEditor.putLong(REGISTER_TIME_STAMP, Calendar.getInstance().getTimeInMillis()).commit();
+						switchPushBtn(true);
+						try {
 							gAnPush.enable();
-							
+						} catch (ArrownockException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						
-					} catch (ArrownockException e) {
-						e.printStackTrace();
 					}
 				}
 
@@ -152,7 +148,7 @@ public class MainActivity extends Activity {
 					}
 					
 					if (exception != null) {
-						Log.e(LOG_TAG,"Pust status changed with error occuring = "+ exception.toString() );
+						Log.e(LOG_TAG,"Push status changed with error occuring = "+ exception.toString() );
 						switchPushBtn(false);
 					}
 				}
@@ -161,7 +157,13 @@ public class MainActivity extends Activity {
 			// Register channels to Lightspeed service.
 			// If register is success, the callback function register() in AnPushCallbackAdapter would be invoked.
 			Log.i(LOG_TAG,"Register push channels");
-			gAnPush.register(channels);
+			
+			if(needRegister()){
+				gAnPush.register(channels);
+			}else{
+				gAnPush.enable();
+				switchPushBtn(true);
+			}
 
 		} catch (ArrownockException ex) {
 			// If there's any error occur during register procedure, we'll print error message on Logcat.
@@ -373,4 +375,13 @@ public class MainActivity extends Activity {
 		return total.toString();
 	}
 
+	private Boolean needRegister(){
+		Long now = Calendar.getInstance().getTimeInMillis();
+		Long last = gSharePref.getLong(REGISTER_TIME_STAMP, 0);
+		if(now - last >= RegisterDelay){
+			return true;
+		}else{
+			return false;
+		}
+	}
 }
