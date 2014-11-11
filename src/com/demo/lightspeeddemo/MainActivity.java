@@ -44,8 +44,6 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	static final String LOG_TAG = "LightSpeedDemo";
 
-	// This is the login URL of Lightspeed.
-	static String loginUrl = "http://api.lightspeedmbs.com/v1/admins/login.json";
 	// sCurrentAct will reference to current Activity context as Activity's onResume() is invoked.
 	static Context sCurrentAct = null;
 
@@ -181,6 +179,9 @@ public class MainActivity extends Activity {
 
 				// This is a custom runnable calss handling login procedure.
 				// Send email, password and loginUrl as arguments to create this class.
+				// This is the login URL of Lightspeed.
+				String api_server_address = getString(R.string.api_server_address);
+				String loginUrl = "http://"+api_server_address+"/v1/admins/login.json";				
 				loginRunnHttp logHttp = new loginRunnHttp(gEditName.getText().toString(), gEditPass.getText().toString(), loginUrl);
 
 				// We can't perform a network operation on main thread so that we need to create a new thread to handle the network operation.

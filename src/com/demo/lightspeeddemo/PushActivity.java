@@ -105,7 +105,8 @@ public class PushActivity extends Activity {
 			
 			// Initiate httpPost with loginUrl
 			String appKey = getString(R.string.app_key);
-			HttpPost httpPost = new HttpPost("http://api.lightspeedmbs.com/v1/push_notification/send.json?key="+appKey);
+			String api_server_address = getString(R.string.api_server_address);
+			HttpPost httpPost = new HttpPost("http://"+api_server_address+"/v1/push_notification/send.json?key="+appKey);
 			
 			// The format of notification message should be a json type. 
 			List<NameValuePair> pair = new ArrayList<NameValuePair>(1);
