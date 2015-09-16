@@ -24,6 +24,7 @@ import com.arrownock.exception.ArrownockException;
 import com.arrownock.push.AnPush;
 import com.arrownock.push.AnPushCallbackAdapter;
 import com.arrownock.push.AnPushStatus;
+import com.arrownock.push.IAnPushRegistrationCallback;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -112,26 +113,7 @@ public class MainActivity extends Activity {
 
 			// Instantiate Lightspeed AnPush instance which is an entry point of Lightspeed service.
 			gAnPush = AnPush.getInstance(getBaseContext());
-			// Designate AnPush callback function. The override method register() would be invoked after register success.
-			// Scenario: We need to make sure the push service is enabled after successful registration.
 			gAnPush.setCallback(new AnPushCallbackAdapter() {
-
-				@Override
-				public void register(boolean err, String anid, ArrownockException exception) {
-					super.register(err, anid, exception);
-					if (err == true) {
-						Log.e(LOG_TAG, "Register with error = " + exception.getMessage());
-					}else{
-						gEditor.putLong(REGISTER_TIME_STAMP, Calendar.getInstance().getTimeInMillis()).commit();
-						switchPushBtn(true);
-						try {
-							gAnPush.enable();
-						} catch (ArrownockException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
 
 				@Override
 				public void statusChanged(AnPushStatus currentStatus, ArrownockException exception) {
@@ -153,11 +135,28 @@ public class MainActivity extends Activity {
 			});
 
 			// Register channels to Lightspeed service.
-			// If register is success, the callback function register() in AnPushCallbackAdapter would be invoked.
-			Log.i(LOG_TAG,"Register push channels");
+			// If register is success, the callback function onSuccess() in IAnPushRegistrationCallback would be invoked.
+			Log.i(LOG_TAG, "Register push channels");
 			
 			if(needRegister()){
-				gAnPush.register(channels);
+				gAnPush.register(channels, new IAnPushRegistrationCallback() {
+					@Override
+					public void onSuccess(String s) {
+						gEditor.putLong(REGISTER_TIME_STAMP, Calendar.getInstance().getTimeInMillis()).commit();
+						switchPushBtn(true);
+						try {
+							gAnPush.enable();
+						} catch (ArrownockException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+
+					@Override
+					public void onError(ArrownockException e) {
+						Log.e(LOG_TAG, "Register with error = " + e.getMessage());
+					}
+				});
 			}else{
 				gAnPush.enable();
 				switchPushBtn(true);
