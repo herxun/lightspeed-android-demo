@@ -20,5 +20,5 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:18.0.0'
-    compile files('libs/lightspeed-android-sdk-2.20.jar')
+    compile files('libs/lightspeed-android-sdk-2.24.8.jar')
 }
